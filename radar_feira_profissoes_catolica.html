@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="shortcut icon" href="ico.jpeg" type="image/x-icon" />
+  <title>Radar da Feira de Profissões | Católica SC</title>
+  <style>
+    :root {
+      --vinho-950: #210509;
+      --vinho-900: #35080f;
+      --vinho-800: #53111c;
+      --vinho-700: #721c2b;
+      --vinho-500: #a34556;
+      --borda: #9a4051;
+      --creme: #fff8f1;
+      --muted: #dfc4c8;
+      --verde: #32c975;
+      --amarelo: #f0bc2c;
+      --vermelho: #e34b57;
+      --preto: #100407;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      color: var(--creme);
+      background: #2e080e;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app {
+      width: min(1400px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      min-height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 18px;
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      background: var(--vinho-900);
+    }
+
+    .marca {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 138px;
+      max-height: 60px;
+      object-fit: contain;
+      padding: 6px;
+      border-radius: 5px;
+      background: #fff;
+    }
+
+    .evento {
+      margin: 0 0 5px;
+      color: #f0bcc4;
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    h1 { margin: 0; font-size: clamp(1.35rem, 3vw, 2.05rem); }
+    .subtitulo { margin: 5px 0 0; color: var(--muted); font-size: .95rem; }
+
+    .acoes { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 11px 14px;
+      cursor: pointer;
+      color: var(--creme);
+      background: var(--vinho-700);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    button:hover { background: var(--vinho-500); }
+    button:disabled { cursor: default; opacity: .65; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(340px, 1fr) minmax(340px, 1fr) 280px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .card {
+      min-width: 0;
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--vinho-900);
+    }
+
+    .card-topo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      height: 47px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--borda);
+      background: var(--vinho-800);
+    }
+
+    .card-titulo {
+      margin: 0;
+      font-size: .88rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      padding: 5px 8px;
+      border-radius: 4px;
+      color: #ffdce0;
+      background: var(--vinho-700);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+    }
+
+    .radar-area { padding: 18px; }
+
+    .radar {
+      position: relative;
+      width: min(100%, 500px);
+      aspect-ratio: 1;
+      margin: auto;
+      overflow: hidden;
+      border: 2px solid var(--verde);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle, transparent 24.3%, rgba(50, 201, 117, .24) 24.7%, transparent 25%),
+        radial-gradient(circle, transparent 49.3%, rgba(50, 201, 117, .24) 49.7%, transparent 50%),
+        radial-gradient(circle, transparent 74.3%, rgba(50, 201, 117, .24) 74.7%, transparent 75%),
+        linear-gradient(rgba(50, 201, 117, .22) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(50, 201, 117, .22) 1px, transparent 1px),
+        #090f0b;
+      background-size: 100% 100%, 100% 100%, 100% 100%, 50% 50%, 50% 50%, auto;
+    }
+
+    .horizontal, .vertical { position: absolute; background: rgba(50, 201, 117, .55); }
+    .horizontal { top: 50%; width: 100%; height: 1px; }
+    .vertical { left: 50%; height: 100%; width: 1px; }
+
+    .varredura {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 50%;
+      height: 2px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--verde), transparent);
+      animation: girar 2.2s linear infinite;
+    }
+
+    @keyframes girar { to { transform: rotate(360deg); } }
+
+    .alvo {
+      position: absolute;
+      top: 78%;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #edfff4;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--verde);
+      transition: top .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .camera-area { padding: 18px; }
+
+    .camera-frame {
+      position: relative;
+      height: 100%;
+      min-height: 370px;
+      overflow: hidden;
+      border: 2px solid #b45b68;
+      border-radius: 7px;
+      background: var(--preto);
+      transition: border-color .2s ease;
+    }
+
+    .camera-frame.atencao { border-color: var(--amarelo); }
+    .camera-frame.perigo { border-color: var(--vermelho); }
+
+    video {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 370px;
+      object-fit: cover;
+      background: #100407;
+    }
+
+    .camera-vazia {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: #dcbac0;
+      text-align: center;
+      background: repeating-linear-gradient(
+        45deg,
+        #16060a,
+        #16060a 10px,
+        #1d080d 10px,
+        #1d080d 20px
+      );
+    }
+
+    .camera-vazia.esconder { display: none; }
+
+    .camera-hud {
+      position: absolute;
+      inset: 12px 12px auto;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .rec {
+      padding: 5px 8px;
+      border-radius: 4px;
+      color: #fff;
+      background: #8e1724;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+    }
+
+    .rec::before {
+      content: "●";
+      margin-right: 5px;
+      color: #fff;
+      font-size: .7rem;
+    }
+
+    .alerta-camera {
+      position: absolute;
+      left: 50%;
+      bottom: 48px;
+      z-index: 3;
+      transform: translateX(-50%);
+      width: max-content;
+      max-width: calc(100% - 28px);
+      padding: 8px 11px;
+      border-radius: 4px;
+      color: #d7ffe7;
+      background: rgba(20, 67, 39, .92);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-align: center;
+    }
+
+    .distancia-camera {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 3;
+      padding: 6px 8px;
+      border-radius: 4px;
+      color: #fff;
+      background: rgba(16, 4, 7, .8);
+      font-size: .75rem;
+      font-weight: 700;
+    }
+
+    .camera-frame.atencao .alerta-camera {
+      color: #2d2200;
+      background: rgba(240, 188, 44, .94);
+    }
+
+    .camera-frame.perigo .alerta-camera {
+      color: #fff;
+      background: rgba(183, 34, 47, .96);
+      animation: alertaCritico .75s steps(2, start) infinite;
+    }
+
+    @keyframes alertaCritico {
+      50% { opacity: .45; }
+    }
+
+    .painel-dados {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .leitura {
+      padding: 23px 18px 18px;
+      text-align: center;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 7px 9px;
+      border-radius: 4px;
+      color: #b9f8d2;
+      background: #1a5131;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+    }
+
+    .numero {
+      margin-top: 24px;
+      color: var(--verde);
+      font-size: clamp(4.5rem, 9vw, 6.5rem);
+      line-height: .85;
+      font-weight: 800;
+    }
+
+    .unidade { margin: 12px 0 0; color: var(--muted); }
+
+    .faixas {
+      display: grid;
+      align-content: end;
+      gap: 10px;
+      padding: 16px;
+      border-top: 1px solid var(--borda);
+      color: #f5e2e4;
+      font-size: .9rem;
+    }
+
+    .faixa { padding-left: 10px; border-left: 5px solid; }
+    .seguro { border-color: var(--verde); }
+    .atencao { border-color: var(--amarelo); }
+    .perigo { border-color: var(--vermelho); }
+
+    .rodape {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 11px 14px;
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      color: #e4c9cd;
+      background: var(--vinho-900);
+      font-size: .84rem;
+    }
+
+    #mensagem { margin: 0; }
+    .privacidade { color: #d7b8bd; }
+
+    @media (max-width: 1080px) {
+      .dashboard { grid-template-columns: 1fr 1fr; }
+      .painel-dados { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+      .faixas { border-top: 0; border-left: 1px solid var(--borda); }
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 12px; }
+      .topbar { padding: 14px; }
+      .logo { width: 105px; }
+      .dashboard { grid-template-columns: 1fr; }
+      .painel-dados { grid-column: auto; grid-template-columns: 1fr; }
+      .faixas { border-top: 1px solid var(--borda); border-left: 0; }
+      .camera-frame, video { min-height: 260px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="marca">
+        <img class="logo" src="logo-catolica.png" alt="Logo Católica SC" />
+        <div>
+          <p class="evento">Feira de Profissões</p>
+          <h1>Radar de Proximidade</h1>
+          <p class="subtitulo">Arduino Uno + HC-SR04 + interface web em tempo real</p>
+        </div>
+      </div>
+
+      <div class="acoes">
+        <button id="conectarArduino">Conectar Arduino</button>
+        <button id="ligarCamera">Ligar CAM 1</button>
+      </div>
+    </header>
+
+    <section class="dashboard">
+      <section class="card">
+        <div class="card-topo">
+          <h2 class="card-titulo">Radar ultrassônico</h2>
+          <span class="tag">SENSOR HC-SR04</span>
+        </div>
+        <div class="radar-area">
+          <div class="radar">
+            <div class="horizontal"></div>
+            <div class="vertical"></div>
+            <div class="varredura"></div>
+            <div class="alvo" id="alvo"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-topo">
+          <h2 class="card-titulo">Monitoramento visual</h2>
+          <span class="tag">CAM 1</span>
+        </div>
+        <div class="camera-area">
+          <div class="camera-frame" id="cameraFrame">
+            <video id="camera" autoplay playsinline muted></video>
+
+            <div class="camera-vazia" id="cameraVazia">
+              <div>
+                <strong>CAM 1 OFFLINE</strong><br />
+                Clique em “Ligar CAM 1” para iniciar a câmera.
+              </div>
+            </div>
+
+            <div class="camera-hud">
+              <span class="rec">AO VIVO</span>
+              <span class="rec">CAM 1</span>
+            </div>
+
+            <div class="alerta-camera" id="alertaCamera">ÁREA SEGURA</div>
+            <div class="distancia-camera" id="distanciaCamera">Distância: -- cm</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="card painel-dados">
+        <div class="leitura">
+          <div class="status" id="status">DESCONECTADO</div>
+          <div class="numero" id="distancia">--</div>
+          <p class="unidade">CENTÍMETROS</p>
+        </div>
+
+        <div class="faixas">
+          <div class="faixa seguro">Seguro: acima de 30 cm</div>
+          <div class="faixa atencao">Atenção: de 11 a 30 cm</div>
+          <div class="faixa perigo">Perigo: até 10 cm</div>
+        </div>
+      </aside>
+    </section>
+
+    <footer class="rodape">
+      <p id="mensagem">Conecte o Arduino pelo USB e clique em “Conectar Arduino”.</p>
+      <span class="privacidade">CAM 1 ao vivo — nenhuma gravação é realizada.</span>
+    </footer>
+  </main>
+
+  <script>
+    const botaoArduino = document.getElementById('conectarArduino');
+    const botaoCamera = document.getElementById('ligarCamera');
+    const camera = document.getElementById('camera');
+    const cameraVazia = document.getElementById('cameraVazia');
+    const cameraFrame = document.getElementById('cameraFrame');
+    const alertaCamera = document.getElementById('alertaCamera');
+    const distanciaCamera = document.getElementById('distanciaCamera');
+    const alvo = document.getElementById('alvo');
+    const distanciaTexto = document.getElementById('distancia');
+    const status = document.getElementById('status');
+    const mensagem = document.getElementById('mensagem');
+
+    let porta;
+    let leitor;
+
+    function atualizarTela(distancia) {
+      distancia = Math.max(0, Math.min(distancia, 400));
+      distanciaTexto.textContent = distancia;
+      distanciaCamera.textContent = `Distância: ${distancia} cm`;
+
+      const posicao = 78 - (distancia / 400) * 55;
+      alvo.style.top = `${posicao}%`;
+
+      cameraFrame.classList.remove('atencao', 'perigo');
+
+      if (distancia <= 10) {
+        status.textContent = 'PERIGO — MUITO PRÓXIMO';
+        status.style.background = '#711d27';
+        status.style.color = '#ffe1e4';
+        distanciaTexto.style.color = 'var(--vermelho)';
+        alvo.style.color = 'var(--vermelho)';
+        alvo.style.background = 'var(--vermelho)';
+        alvo.style.borderColor = '#fff0f1';
+        cameraFrame.classList.add('perigo');
+        alertaCamera.textContent = '⚠ ALERTA DE PROXIMIDADE';
+      } else if (distancia <= 30) {
+        status.textContent = 'ATENÇÃO — APROXIMAÇÃO';
+        status.style.background = '#6a5114';
+        status.style.color = '#fff0ae';
+        distanciaTexto.style.color = 'var(--amarelo)';
+        alvo.style.color = 'var(--amarelo)';
+        alvo.style.background = 'var(--amarelo)';
+        alvo.style.borderColor = '#fff9de';
+        cameraFrame.classList.add('atencao');
+        alertaCamera.textContent = 'ATENÇÃO — MOVIMENTO PRÓXIMO';
+      } else {
+        status.textContent = 'ÁREA SEGURA';
+        status.style.background = '#1a5131';
+        status.style.color = '#b9f8d2';
+        distanciaTexto.style.color = 'var(--verde)';
+        alvo.style.color = 'var(--verde)';
+        alvo.style.background = 'var(--verde)';
+        alvo.style.borderColor = '#edfff4';
+        alertaCamera.textContent = 'ÁREA SEGURA';
+      }
+    }
+
+    async function lerArduino() {
+      const decoder = new TextDecoderStream();
+      const fechamentoStream = porta.readable.pipeTo(decoder.writable);
+      leitor = decoder.readable.getReader();
+      let pendente = '';
+
+      try {
+        while (true) {
+          const { value, done } = await leitor.read();
+          if (done) break;
+
+          pendente += value;
+          const linhas = pendente.split('\n');
+          pendente = linhas.pop();
+
+          for (const linha of linhas) {
+            const valor = Number(linha.trim());
+            if (!Number.isNaN(valor) && valor >= 0) {
+              atualizarTela(valor);
+            }
+          }
+        }
+      } catch (erro) {
+        mensagem.textContent = `Conexão encerrada: ${erro.message}`;
+        status.textContent = 'ARDUINO DESCONECTADO';
+        botaoArduino.disabled = false;
+        botaoArduino.textContent = 'Reconectar Arduino';
+      } finally {
+        leitor.releaseLock();
+        await fechamentoStream.catch(() => {});
+      }
+    }
+
+    botaoArduino.addEventListener('click', async () => {
+      if (!('serial' in navigator)) {
+        mensagem.textContent = 'Use o Google Chrome ou Microsoft Edge no computador.';
+        return;
+      }
+
+      try {
+        porta = await navigator.serial.requestPort();
+        await porta.open({ baudRate: 9600 });
+
+        botaoArduino.textContent = 'Arduino conectado';
+        botaoArduino.disabled = true;
+        status.textContent = 'CONECTADO — LENDO SENSOR';
+        mensagem.textContent = 'Arduino conectado. Aproxime a mão do sensor ultrassônico.';
+        lerArduino();
+      } catch (erro) {
+        mensagem.textContent = `Não foi possível conectar: ${erro.message}`;
+        botaoArduino.disabled = false;
+      }
+    });
+
+    botaoCamera.addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        mensagem.textContent = 'Este navegador não permite acesso à câmera nesta página.';
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+
+        camera.srcObject = stream;
+        cameraVazia.classList.add('esconder');
+        botaoCamera.textContent = 'CAM 1 ligada';
+        botaoCamera.disabled = true;
+        mensagem.textContent = 'CAM 1 ligada. A área monitorada está sendo exibida ao vivo.';
+      } catch (erro) {
+        mensagem.textContent = `Não foi possível ligar a câmera: ${erro.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
